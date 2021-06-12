@@ -24,7 +24,7 @@ abstract class Server
      * 监听端口
      * @var string
      */
-    public $port = 9500;
+    public $port = 9000;
 
     protected $event = [
         // 服务事件
