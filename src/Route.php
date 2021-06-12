@@ -75,7 +75,7 @@ class Route extends Server
     public function onWorkerStart($server, int $workerId)
     {
         $this->redis = new Redis;
-        $this->redis->pconnect("127.0.0.1", 6379);
+        $this->redis->pconnect("192.168.218.30", 6379);
     }
 
     /**

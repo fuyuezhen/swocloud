@@ -59,8 +59,8 @@ class Dispatcher
         $key   = "swocloud";
         $time  = time();
         $token = [
-            'iss' => "http://192.168.218.20", // 可选参数
-            'aud' => "http://192.168.218.20", // 可选参数
+            'iss' => "http://192.168.218.30", // 可选参数
+            'aud' => "http://192.168.218.30", // 可选参数
             'iat' => $time, // 签发时间
             'nbf' => $time, // 生效时间
             'exp' => $time + 7200, // 过期时间
