@@ -34,7 +34,7 @@ class Dispatcher
 
         // 生成 token
         $token = $this->getJwtToken($server['ip'], $data['id'], $url);
-        info($token);
+        // info($token);
         $swooleResponse->end(json_encode(['token' => $token, 'url' => $url]));
     }
 
