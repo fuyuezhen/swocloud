@@ -3,6 +3,7 @@ namespace swocloud;
 
 use Swoole\Server as SwooleServer;
 use \Redis;
+use Swoole\Coroutine\Http\Client;
 use Swoole\Http\Request;
 use Swoole\Http\Response;
 use swocloud\support\Arithmetic;
@@ -36,6 +37,100 @@ class Dispatcher
         $token = $this->getJwtToken($server['ip'], $data['id'], $url);
         // info($token);
         $swooleResponse->end(json_encode(['token' => $token, 'url' => $url]));
+    }
+
+    /**
+     * 服务注册
+     *
+     * @param Route $route
+     * @param SwooleServer $server
+     * @param [type] $fd
+     * @param [type] $data
+     * @return void
+     */
+    public function register(Route $route, SwooleServer $server, $fd, $data)
+    {
+        $serverKey = $route->getServerKey();
+        // 把服务器信息保存到redis中
+        $redis     = $route->getRedis();
+        $value     = json_encode([
+            'ip'   => $data['ip'],
+            'port' => $data['port'],
+        ]);
+        $redis->sadd($serverKey, $value);
+        // 这里需要触发定时器判断，不用heartbeat_check_interval，因为我们需要有后续炒作，比如清空redis数据
+        $server->tick(3000, function($timer_id, Redis $redis, $server, $serverKey, $fd, $value){
+            if (!$server->exist($fd)) {
+                $redis->srem($serverKey, $value);
+                $server->clearTimer($timer_id);
+
+                info("im server 宕机，主动清空");
+            }
+        }, $redis, $server, $serverKey, $fd, $value);
+
+    }
+
+    /**
+     * 路由向所有服务器进行广播 =》 服务器再向自己的客户端进行信息发送
+     *
+     * @param Route $route
+     * @param SwooleServer $server
+     * @param [type] $fd
+     * @param [type] $data
+     * @return void
+     */
+    public function routeBroadcast(Route $route, SwooleServer $server, $fd, $data)
+    {
+        // 从redis中读取所有服务器信息
+        $ims = $route->getIMServers();
+        foreach ($ims as $key => $im) {
+            $imInfo = json_decode($im, true);
+            // 这里需要注意，因为我们的server实际上是有jwt的认证，因此route也需要生成jwt的token并发送
+            $this->send($route, $imInfo['ip'], $imInfo['port'], [
+                'data' => [
+                    'msg' => $data['msg']
+                ]
+            ]);
+        }
+    }
+
+    /**
+     * route服务器发送信息给其他服务器
+     *
+     * @param Route $route
+     * @param [type] $ip
+     * @param [type] $port
+     * @param [type] $data
+     * @return void
+     */
+    protected function send(Route $route, $ip, $port, $data)
+    {
+        $token = $this->getJwtToken(0, 0, $ip . ":" . $port);
+        $client = new Client($ip, $port);
+        $client->setHeaders(['sec-websocket-protocol' => $token]);
+        $ret = $client->upgrade("/"); // 升级为 WebSocket 连接。
+        if ($ret) {
+            $data = [
+                'method'      => 'routeBroadcast',
+            ];
+            $client->push(json_encode($data));
+        }
+    }
+
+    /**
+     * 根据算法获取连接服务
+     * @param Route $route
+     * @return void
+     */
+    protected function getIMServer(Route $route)
+    {
+        // 从redis中获取列表
+        $list = $route->getRedis()->smembers($route->getServerKey());
+
+        if (!empty($list)) {
+            return Arithmetic::{$route->getArithmetic()}($list);
+        }
+        return false;
     }
 
     /**
@@ -74,50 +169,6 @@ class Dispatcher
     }
 
     /**
-     * 根据算法获取连接服务
-     *
-     * @param Route $route
-     * @return void
-     */
-    protected function getIMServer(Route $route)
-    {
-        // 从redis中获取列表
-        $list = $route->getRedis()->smembers($route->getServerKey());
-
-        if (!empty($list)) {
-            return Arithmetic::{$route->getArithmetic()}($list);
-        }
-        return false;
-    }
-
-    /**
-     * 服务注册
-     *
-     * @return void
-     */
-    public function register(Route $route, SwooleServer $server, $fd, $data)
-    {
-        $serverKey = $route->getServerKey();
-        // 把服务器信息保存到redis中
-        $redis     = $route->getRedis();
-        $value     = json_encode([
-            'ip'   => $data['ip'],
-            'port' => $data['port'],
-        ]);
-        $redis->sadd($serverKey, $value);
-        // 这里需要触发定时器判断，不用heartbeat_check_interval，因为我们需要有后续炒作，比如清空redis数据
-        $server->tick(3000, function($timer_id, Redis $redis, $server, $serverKey, $fd, $value){
-            if (!$server->exist($fd)) {
-                $redis->srem($serverKey, $value);
-                $server->clearTimer($timer_id);
-
-                info("im server 宕机，主动清空");
-            }
-        }, $redis, $server, $serverKey, $fd, $value);
-
-    }
-
-    /**
      * 没有找到方法
      *
      * @return void
@@ -126,4 +177,5 @@ class Dispatcher
     {
         info("没有找到方法");
     }
+
 }

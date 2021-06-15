@@ -186,4 +186,13 @@ class Route extends Server
     {
         return $this->serverKey;
     }
+
+    /**
+     * 获取所有的连接服务器集合
+     * @return void
+     */
+    public function getIMServers()
+    {
+        return $this->getRedis()->smembers($this->getServerKey());
+    }
 }
