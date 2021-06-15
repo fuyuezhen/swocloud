@@ -114,6 +114,7 @@ class Dispatcher
                 'method' => 'routeBroadcast',
                 'msg'    => $data['msg'],
             ];
+            var_dump($data);
             var_dump($info);
             $client->push(json_encode($info));
         }
