@@ -110,13 +110,9 @@ class Dispatcher
         $client->setHeaders(['sec-websocket-protocol' => $token]);
         $ret = $client->upgrade("/"); // 升级为 WebSocket 连接。
         if ($ret) {
-            $info = [
-                'method' => 'routeBroadcast',
-                'msg'    => $data['msg'],
-            ];
+            $data['method'] = 'routeBroadcast'; 
             var_dump($data);
-            var_dump($info);
-            $client->push(json_encode($info));
+            $client->push(json_encode($data));
         }
     }
 
