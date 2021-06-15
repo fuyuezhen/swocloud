@@ -24,7 +24,6 @@ class Dispatcher
     public function login(Route $route, Request $swooleRequest, Response $swooleResponse)
     {
         $data = $swooleRequest->post;
-        $data['id'] = 1;
         // 用户名和密码校验
         // ... code
 
