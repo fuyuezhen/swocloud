@@ -109,6 +109,7 @@ class Route extends Server
      */
     public function onMessage(SwooleServer $server, $frame) {
         $data = json_decode($frame->data, true);
+        var_dump($data);
         $this->getDispatcher()->{$data['method']}($this, $server, $frame->fd, $data);
     }
 
