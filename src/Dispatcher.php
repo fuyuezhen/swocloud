@@ -112,7 +112,6 @@ class Dispatcher
         if ($ret) {
             $info = $data['data'];
             $info['method'] = 'routeBroadcast'; 
-            var_dump($info);
             $client->push(json_encode($info));
         }
     }
