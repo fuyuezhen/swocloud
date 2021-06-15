@@ -34,7 +34,7 @@ class Dispatcher
         $url = $server['ip'] . ":" . $server['port'];
 
         // 生成 token
-        $token = $this->getJwtToken($server['ip'], $data['id'], $url);
+        $token = $this->getJwtToken($data['id'], $url);
         // info($token);
         $swooleResponse->end(json_encode(['token' => $token, 'url' => $url]));
     }
@@ -105,7 +105,7 @@ class Dispatcher
      */
     protected function send(Route $route, $ip, $port, $data)
     {
-        $token = $this->getJwtToken(0, 0, $ip . ":" . $port);
+        $token = $this->getJwtToken(0, $ip . ":" . $port);
         $client = new Client($ip, $port);
         $client->setHeaders(['sec-websocket-protocol' => $token]);
         $ret = $client->upgrade("/"); // 升级为 WebSocket 连接。
@@ -136,12 +136,11 @@ class Dispatcher
     /**
      * 获取Token
      *
-     * @param [type] $sid 服务器的fd
      * @param [type] $uid 用户ID
      * @param [type] $url 连接的地址
      * @return void
      */
-    protected function getJwtToken($sid, $uid, $url)
+    protected function getJwtToken($uid, $url)
     {
         // iss：jwt签发者
         // aud：接受jwt的一方
@@ -161,7 +160,7 @@ class Dispatcher
             'exp' => $time + 7200, // 过期时间
             'data' => [
                 'uid'  => $uid,
-                'name'  => "client" . $time . $sid, // 用户名
+                'name'  => "client_" . $time . "_" . $uid, // 用户名
                 'service_url' => $url,
             ],
         ];
