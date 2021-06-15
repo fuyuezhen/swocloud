@@ -159,8 +159,8 @@ class Dispatcher
             'nbf' => $time, // 生效时间
             'exp' => $time + 7200, // 过期时间
             'data' => [
-                'uid'  => $uid,
-                'name'  => "client_" . $time . "_" . $uid, // 用户名
+                'uid'         => $uid,
+                'name'        => "client_" . $time . "_" . $uid, // 用户名
                 'service_url' => $url,
             ],
         ];
