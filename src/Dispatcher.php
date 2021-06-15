@@ -114,6 +114,7 @@ class Dispatcher
             $info['method'] = 'routeBroadcast'; 
             $client->push(json_encode($info));
         }
+        $client->close();
     }
 
     /**
