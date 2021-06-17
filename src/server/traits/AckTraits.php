@@ -1,5 +1,5 @@
 <?php
-namespace swocloud\traits;
+namespace swocloud\server\traits;
 
 use Co;
 use Swoole\Coroutine\Http\Client;
