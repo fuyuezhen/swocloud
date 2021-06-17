@@ -3,7 +3,6 @@ namespace swocloud;
 
 use Swoole\Server as SwooleServer;
 use \Redis;
-use Swoole\Coroutine\Http\Client;
 use Swoole\Http\Request;
 use Swoole\Http\Response;
 use swocloud\support\Arithmetic;
@@ -81,39 +80,24 @@ class Dispatcher
     public function routeBroadcast(Route $route, SwooleServer $server, $fd, $data)
     {
         // 从redis中读取所有服务器信息
-        $ims = $route->getIMServers();
+        $ims   = $route->getIMServers();
+        $token = $this->getJwtToken(0, $ip . ":" . $port);
         foreach ($ims as $key => $im) {
             $imInfo = json_decode($im, true);
             // 这里需要注意，因为我们的server实际上是有jwt的认证，因此route也需要生成jwt的token并发送
-            $this->send($route, $imInfo['ip'], $imInfo['port'], [
-                'data' => [
-                    'msg' => $data['msg']
-                ]
-            ]);
-        }
-    }
 
-    /**
-     * route服务器发送信息给其他服务器
-     *
-     * @param Route $route
-     * @param [type] $ip
-     * @param [type] $port
-     * @param [type] $data
-     * @return void
-     */
-    protected function send(Route $route, $ip, $port, $data)
-    {
-        $token = $this->getJwtToken(0, $ip . ":" . $port);
-        $client = new Client($ip, $port);
-        $client->setHeaders(['sec-websocket-protocol' => $token]);
-        $ret = $client->upgrade("/"); // 升级为 WebSocket 连接。
-        if ($ret) {
-            $info = $data['data'];
-            $info['method'] = 'routeBroadcast'; 
-            $client->push(json_encode($info));
+
+            // 使用session_create_id()函数生成唯一标识符，经过实际测试发现，即使循环调用session_create_id()一亿次，都没有出现过重复。
+            $uniqid = session_create_id();
+
+            $route->send($imInfo['ip'], $imInfo['port'], [
+                'msg'    => $data['msg'],
+                'method' => 'routeBroadcast',
+                'msg_id' => $uniqid,
+            ], [
+                'sec-websocket-protocol' => $token
+            ], $uniqid);
         }
-        $client->close();
     }
 
     /**

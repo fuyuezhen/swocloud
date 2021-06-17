@@ -2,6 +2,7 @@
 namespace swocloud;
 
 use Swoole\WebSocket\Server as SwooleServer;
+use Swoole\Coroutine\Http\Client;
 use Swoole\Http\Request;
 use Swoole\Http\Response;
 use \Redis;
@@ -12,6 +13,7 @@ use \Redis;
  */
 class Route extends Server
 {
+
     /**
      * 服务器选择算法
      *
@@ -194,5 +196,28 @@ class Route extends Server
     public function getIMServers()
     {
         return $this->getRedis()->smembers($this->getServerKey());
+    }
+
+    /**
+     * route服务器发送信息给其他服务器
+     *
+     * @param Route $route
+     * @param [type] $ip
+     * @param [type] $port
+     * @param [type] $data
+     * @return void
+     */
+    public function send($ip, $port, $data, $header = null, $uniqid = null)
+    {
+        $client = new Client($ip, $port);
+        // 判断是否设置header
+        empty($header) ?: $client->setHeaders($header);
+        $ret = $client->upgrade("/"); // 升级为 WebSocket 连接。
+        if ($ret) {
+            $client->push(json_encode($data));
+        }
+
+        // 进行消息的确认
+        $this->confirmGo($uniqid, $data, $client);
     }
 }

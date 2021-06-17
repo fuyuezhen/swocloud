@@ -2,12 +2,15 @@
 namespace swocloud;
 
 use Swoole\Server as SwooleServer;
+use swocloud\traits\AckTraits;
 
 /**
  * 服务公共抽象父类
  */
 abstract class Server
 {
+    use AckTraits;
+
     /**
      * 保存swoole对象
      * @var SwooleServer
