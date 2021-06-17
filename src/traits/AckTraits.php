@@ -46,6 +46,7 @@ trait AckTraits
                 Co::sleep(1); // 延迟1秒
                 $ackData = $client->recv(0.2); // 接收消息。只为 WebSocket 使用，需要配合 upgrade() 使用；$timeout 超时时间
                 $ack = json_decode($ackData, true);
+                var_dump($ack);
                 // 判断是否确认
                 if (isset($ack['method']) && $ack['method'] == 'ack') {
                     // 确认则修改
