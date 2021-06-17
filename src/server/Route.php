@@ -1,5 +1,5 @@
 <?php
-namespace swocloud;
+namespace swocloud\server;
 
 use Swoole\WebSocket\Server as SwooleServer;
 use Swoole\Coroutine\Http\Client;

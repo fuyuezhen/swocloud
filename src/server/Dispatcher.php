@@ -1,11 +1,12 @@
 <?php
-namespace swocloud;
+namespace swocloud\server;
 
 use Swoole\Server as SwooleServer;
 use \Redis;
 use Swoole\Http\Request;
 use Swoole\Http\Response;
 use swocloud\support\Arithmetic;
+use swocloud\server\Route;
 
 /**
  * 分发事件处理类

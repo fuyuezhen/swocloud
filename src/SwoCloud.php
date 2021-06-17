@@ -1,6 +1,8 @@
 <?php
 namespace swocloud;
 
+use swocloud\server\Route;
+
 /**
  * 入口文件
  */

@@ -1,8 +1,8 @@
 <?php
-namespace swocloud;
+namespace swocloud\server;
 
 use Swoole\Server as SwooleServer;
-use swocloud\traits\AckTraits;
+use swocloud\server\traits\AckTraits;
 
 /**
  * 服务公共抽象父类
