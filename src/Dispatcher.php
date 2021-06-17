@@ -81,7 +81,7 @@ class Dispatcher
     {
         // 从redis中读取所有服务器信息
         $ims   = $route->getIMServers();
-        $token = $this->getJwtToken(0, $ip . ":" . $port);
+        $token = $this->getJwtToken(0, $route->getHost() . ":" . $route->getPort());
         foreach ($ims as $key => $im) {
             $imInfo = json_decode($im, true);
             // 这里需要注意，因为我们的server实际上是有jwt的认证，因此route也需要生成jwt的token并发送

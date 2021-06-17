@@ -178,6 +178,22 @@ class Route extends Server
     {
         return $this->redis;
     }
+    /**
+     * 获取地址
+     * @return void
+     */
+    public function getHost()
+    {
+        return $this->host;
+    }
+    /**
+     * 获取端口
+     * @return void
+     */
+    public function getPort()
+    {
+        return $this->port;
+    }
 
     /**
      * 获取serverKey
@@ -212,6 +228,7 @@ class Route extends Server
         $client = new Client($ip, $port);
         // 判断是否设置header
         empty($header) ?: $client->setHeaders($header);
+        var_dump($header);
         $ret = $client->upgrade("/"); // 升级为 WebSocket 连接。
         if ($ret) {
             $client->push(json_encode($data));
