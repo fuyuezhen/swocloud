@@ -55,7 +55,7 @@ trait AckTraits
                 // 查询任务的状态
                 $task = $this->table->get($uniqid);
                 // 如果任务已经被确认了，或者重试超过了3次之后就会清空任务
-                if ($task['ack'] > 0 && $task['num'] >= 3) {
+                if ($task['ack'] > 0 || $task['num'] >= 3) {
                     info("清空任务，" . $uniqid);
                     // 清空任务
                     $this->table->del($uniqid);
