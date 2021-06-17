@@ -5,7 +5,7 @@ use Co;
 use Swoole\Coroutine\Http\Client;
 use Swoole\Table;
 
-class AckTraits
+trait AckTraits
 {
     /**
      * 共享内存
