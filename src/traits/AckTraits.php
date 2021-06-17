@@ -50,12 +50,14 @@ trait AckTraits
                 if (isset($ack['method']) && $ack['method'] == 'ack') {
                     // 确认则修改
                     $this->table->incr($ack['msg_id'], 'ack');
+                    info("确认信息，" . $ack['msg_id']);
                 }
                 // 查询任务的状态
                 $task = $this->table->get($uniqid);
 
                 // 如果任务已经被确认了，或者重试超过了3次之后就会清空任务
                 if ($task['ack'] > 0 && $task['num'] >= 0) {
+                    info("清空任务，" . $uniqid);
                     // 清空任务
                     $this->table->del($uniqid);
                     // 关闭客户端
@@ -66,6 +68,7 @@ trait AckTraits
                 }
                 // 尝试次数加1
                 $this->table->incr($uniqid, 'num');
+                info("尝试一次，" . $uniqid);
             }
         });
     }
