@@ -112,6 +112,8 @@ abstract class Server
             return "error";
         }
 
+        $this->createTable(); // 创建共享内存
+
         // 设置swoole的配置
         $this->swooleServer->set($this->config);
 
