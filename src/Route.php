@@ -228,7 +228,6 @@ class Route extends Server
         $client = new Client($ip, $port);
         // 判断是否设置header
         empty($header) ?: $client->setHeaders($header);
-        var_dump($header);
         $ret = $client->upgrade("/"); // 升级为 WebSocket 连接。
         if ($ret) {
             $client->push(json_encode($data));
